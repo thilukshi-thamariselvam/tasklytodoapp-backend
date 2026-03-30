@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: tasklytodoapp
+  profiles:
+    active: dev
+
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+
+  flyway:
+    enabled: false
+
+server:
+  port: 8080
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    try-it-out-enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.tasklytodoapp: DEBUG
