@@ -16,9 +16,6 @@ spring:
     hibernate:
       ddl-auto: validate
 
-  flyway:
-    enabled: false
-
 server:
   port: 8080
 
