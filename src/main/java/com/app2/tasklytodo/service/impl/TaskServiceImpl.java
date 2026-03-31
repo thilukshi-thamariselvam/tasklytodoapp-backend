@@ -2,6 +2,7 @@ package com.app2.tasklytodo.service.impl;
 
 import com.app2.tasklytodo.dto.task.TaskCreateRequest;
 import com.app2.tasklytodo.dto.task.TaskResponse;
+import com.app2.tasklytodo.dto.task.TaskUpdateRequest;
 import com.app2.tasklytodo.entity.Project;
 import com.app2.tasklytodo.entity.Task;
 import com.app2.tasklytodo.entity.User;
@@ -61,5 +62,39 @@ public class TaskServiceImpl implements TaskService {
         log.info("Fetching all tasks for user: {}", userId);
         List<Task> tasks = taskRepository.findByUserIdOrderByDueDateAscCreatedAtDesc(Long.valueOf(userId));
         return taskMapper.toResponseList(tasks);
+    }
+
+    @Override
+    @Transactional
+    public TaskResponse updateTask(Long taskId, TaskUpdateRequest request) {
+        log.info("Updating task with id: {}", taskId);
+
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found with id: " + taskId));
+
+        if (request.getTitle() != null) {
+            task.setTitle(request.getTitle());
+        }
+        if (request.getDescription() != null) {
+            task.setDescription(request.getDescription());
+        }
+        if (request.getDueDate() != null) {
+            task.setDueDate(request.getDueDate());
+        }
+
+        Task updatedTask = taskRepository.save(task);
+        return taskMapper.toResponse(updatedTask);
+    }
+
+    @Override
+    @Transactional
+    public void deleteTask(Long taskId) {
+        log.info("Deleting task with id: {}", taskId);
+
+        if (!taskRepository.existsById(taskId)) {
+            throw new RuntimeException("Task not found with id: " + taskId);
+        }
+
+        taskRepository.deleteById(taskId);
     }
 }
