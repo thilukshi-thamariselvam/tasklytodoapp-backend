@@ -2,6 +2,7 @@ package com.app2.tasklytodo.controller;
 
 import com.app2.tasklytodo.dto.task.TaskCreateRequest;
 import com.app2.tasklytodo.dto.task.TaskResponse;
+import com.app2.tasklytodo.dto.task.TaskUpdateRequest;
 import com.app2.tasklytodo.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,5 +29,19 @@ public class TaskController {
     public ResponseEntity<List<TaskResponse>> getTasks(@RequestParam String userId) {
         List<TaskResponse> responses = taskService.getTasksByUser(userId);
         return ResponseEntity.ok(responses);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<TaskResponse> updateTask(
+            @PathVariable Long id,
+            @Valid @RequestBody TaskUpdateRequest request) {
+        TaskResponse response = taskService.updateTask(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
+        taskService.deleteTask(id);
+        return ResponseEntity.noContent().build();
     }
 }
