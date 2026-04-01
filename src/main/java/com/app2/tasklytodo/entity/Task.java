@@ -1,8 +1,10 @@
 package com.app2.tasklytodo.entity;
 
+import com.app2.tasklytodo.entity.enums.TaskPriority;
 import com.app2.tasklytodo.entity.enums.TaskStatus;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -33,6 +35,10 @@ public class Task {
     @Column(nullable = false, length = 20)
     private TaskStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private TaskPriority priority;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -60,9 +66,8 @@ public class Task {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
-        if (status == null) {
-            this.status = TaskStatus.PENDING;
-        }
+        if (status == null) this.status = TaskStatus.PENDING;
+        if (priority == null) this.priority = TaskPriority.LOW;
     }
 
     @PreUpdate

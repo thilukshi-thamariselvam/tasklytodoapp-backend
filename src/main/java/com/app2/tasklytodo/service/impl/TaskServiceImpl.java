@@ -6,6 +6,7 @@ import com.app2.tasklytodo.dto.task.TaskUpdateRequest;
 import com.app2.tasklytodo.entity.Project;
 import com.app2.tasklytodo.entity.Task;
 import com.app2.tasklytodo.entity.User;
+import com.app2.tasklytodo.entity.enums.TaskPriority;
 import com.app2.tasklytodo.entity.enums.TaskStatus;
 import com.app2.tasklytodo.mapper.TaskMapper;
 import com.app2.tasklytodo.repository.ProjectRepository;
@@ -48,6 +49,7 @@ public class TaskServiceImpl implements TaskService {
                 .description(request.getDescription())
                 .dueDate(request.getDueDate())
                 .status(TaskStatus.PENDING)
+                .priority(request.getPriority() != null ? request.getPriority() : TaskPriority.LOW)
                 .user(user)
                 .project(project)
                 .build();
@@ -80,6 +82,9 @@ public class TaskServiceImpl implements TaskService {
         }
         if (request.getDueDate() != null) {
             task.setDueDate(request.getDueDate());
+        }
+        if (request.getPriority() != null) {
+            task.setPriority(request.getPriority());
         }
 
         Task updatedTask = taskRepository.save(task);

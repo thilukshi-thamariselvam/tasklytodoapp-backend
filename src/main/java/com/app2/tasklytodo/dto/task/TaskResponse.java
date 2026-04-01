@@ -1,5 +1,6 @@
 package com.app2.tasklytodo.dto.task;
 
+import com.app2.tasklytodo.entity.enums.TaskPriority;
 import com.app2.tasklytodo.entity.enums.TaskStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
@@ -14,6 +15,8 @@ public class TaskResponse {
     private Long id;
     private String title;
     private String description;
+
+    private TaskPriority priority;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dueDate;
