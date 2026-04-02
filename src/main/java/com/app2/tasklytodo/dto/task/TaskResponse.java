@@ -1,5 +1,6 @@
 package com.app2.tasklytodo.dto.task;
 
+import com.app2.tasklytodo.dto.label.LabelResponse;
 import com.app2.tasklytodo.entity.enums.TaskPriority;
 import com.app2.tasklytodo.entity.enums.TaskStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -8,6 +9,7 @@ import lombok.Data;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -25,6 +27,8 @@ public class TaskResponse {
     private TaskStatus status;
 
     private List<TaskResponse> subtasks;
+
+    private Set<LabelResponse> labels;
 
     private Long projectId;
     private String projectName;

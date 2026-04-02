@@ -3,6 +3,7 @@ package com.app2.tasklytodo.service.impl;
 import com.app2.tasklytodo.dto.task.TaskCreateRequest;
 import com.app2.tasklytodo.dto.task.TaskResponse;
 import com.app2.tasklytodo.dto.task.TaskUpdateRequest;
+import com.app2.tasklytodo.entity.Label;
 import com.app2.tasklytodo.entity.Project;
 import com.app2.tasklytodo.entity.Task;
 import com.app2.tasklytodo.entity.User;
@@ -11,6 +12,7 @@ import com.app2.tasklytodo.entity.enums.TaskStatus;
 import com.app2.tasklytodo.exception.BadRequestException;
 import com.app2.tasklytodo.exception.ResourceNotFoundException;
 import com.app2.tasklytodo.mapper.TaskMapper;
+import com.app2.tasklytodo.repository.LabelRepository;
 import com.app2.tasklytodo.repository.ProjectRepository;
 import com.app2.tasklytodo.repository.TaskRepository;
 import com.app2.tasklytodo.repository.UserRepository;
@@ -22,7 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +36,7 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
+    private final LabelRepository labelRepository;
     private final TaskMapper taskMapper;
 
     @Override
@@ -57,6 +62,11 @@ public class TaskServiceImpl implements TaskService {
                 .user(user)
                 .project(project)
                 .build();
+
+        if (request.getLabelIds() != null && !request.getLabelIds().isEmpty()) {
+            Set<Label> labels = new HashSet<>(labelRepository.findAllById(request.getLabelIds()));
+            task.setLabels(labels);
+        }
 
         Task savedTask = taskRepository.save(task);
 

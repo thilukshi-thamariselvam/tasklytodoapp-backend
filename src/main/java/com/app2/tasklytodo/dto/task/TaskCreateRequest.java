@@ -27,6 +27,8 @@ public class TaskCreateRequest {
 
     private List<String> subtaskTitles;
 
+    private List<Long> labelIds;
+
     @NotBlank(message = "User ID is required")
     private String userId;
 }
