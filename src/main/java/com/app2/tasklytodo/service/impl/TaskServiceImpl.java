@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -55,6 +56,26 @@ public class TaskServiceImpl implements TaskService {
                 .build();
 
         Task savedTask = taskRepository.save(task);
+
+        if (request.getSubtaskTitles() != null && !request.getSubtaskTitles().isEmpty()) {
+            List<Task> newSubtasks = new ArrayList<>();
+
+            for (String subtaskTitle : request.getSubtaskTitles()) {
+                Task subtask = Task.builder()
+                        .title(subtaskTitle)
+                        .status(TaskStatus.PENDING)
+                        .priority(task.getPriority())
+                        .user(user)
+                        .parentTask(savedTask)
+                        .build();
+
+                newSubtasks.add(subtask);
+            }
+
+            savedTask.setSubtasks(newSubtasks);
+            savedTask = taskRepository.save(savedTask);
+        }
+
         return taskMapper.toResponse(savedTask);
     }
 
@@ -62,7 +83,7 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(readOnly = true)
     public List<TaskResponse> getTasksByUser(String userId) {
         log.info("Fetching all tasks for user: {}", userId);
-        List<Task> tasks = taskRepository.findByUserIdOrderByDueDateAscCreatedAtDesc(Long.valueOf(userId));
+        List<Task> tasks = taskRepository.findByUserIdAndParentTaskIsNullOrderByDueDateAscCreatedAtDesc(Long.valueOf(userId));
         return taskMapper.toResponseList(tasks);
     }
 
