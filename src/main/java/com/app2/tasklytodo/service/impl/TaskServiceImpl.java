@@ -8,6 +8,8 @@ import com.app2.tasklytodo.entity.Task;
 import com.app2.tasklytodo.entity.User;
 import com.app2.tasklytodo.entity.enums.TaskPriority;
 import com.app2.tasklytodo.entity.enums.TaskStatus;
+import com.app2.tasklytodo.exception.BadRequestException;
+import com.app2.tasklytodo.exception.ResourceNotFoundException;
 import com.app2.tasklytodo.mapper.TaskMapper;
 import com.app2.tasklytodo.repository.ProjectRepository;
 import com.app2.tasklytodo.repository.TaskRepository;
@@ -15,10 +17,8 @@ import com.app2.tasklytodo.repository.UserRepository;
 import com.app2.tasklytodo.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -40,12 +40,12 @@ public class TaskServiceImpl implements TaskService {
         log.info("Creating task: {} for user: {}", request.getTitle(), request.getUserId());
 
         User user = userRepository.findById(Long.valueOf(request.getUserId()))
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Project project = null;
         if (request.getProjectId() != null) {
             project = projectRepository.findById(request.getProjectId())
-                    .orElseThrow(() -> new RuntimeException("Project not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
         }
 
         Task task = Task.builder()
@@ -95,10 +95,10 @@ public class TaskServiceImpl implements TaskService {
     public TaskResponse getTaskById(Long taskId) {
         log.info("Fetching task with id: {}", taskId);
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Task not found with id: " + taskId));
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
 
         if (task.getDeletedAt() != null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found with id: " + taskId);
+            throw new ResourceNotFoundException("Task not found with id: " + taskId);
         }
 
         return taskMapper.toResponse(task);
@@ -110,7 +110,7 @@ public class TaskServiceImpl implements TaskService {
         log.info("Updating task with id: {}", taskId);
 
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Task not found with id: " + taskId));
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
 
         if (request.getTitle() != null) {
             task.setTitle(request.getTitle());
@@ -155,10 +155,10 @@ public class TaskServiceImpl implements TaskService {
         log.info("Soft deleting task with id: {}", taskId);
 
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Task not found with id: " + taskId));
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
 
         if (task.getDeletedAt() != null) {
-            throw new RuntimeException("Task is already deleted");
+            throw new BadRequestException("Task is already deleted");
         }
 
         task.setDeletedAt(LocalDateTime.now());
@@ -171,7 +171,7 @@ public class TaskServiceImpl implements TaskService {
         log.info("Completing task with id: {}", taskId);
 
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Task not found with id: " + taskId));
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
 
         task.setStatus(TaskStatus.COMPLETED);
 
