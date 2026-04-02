@@ -19,4 +19,6 @@ public interface TaskService {
     TaskResponse completeTask(Long taskId);
 
     TaskResponse getTaskById(Long taskId);
+
+    List<TaskResponse> searchTasks(String userId, String query);
 }

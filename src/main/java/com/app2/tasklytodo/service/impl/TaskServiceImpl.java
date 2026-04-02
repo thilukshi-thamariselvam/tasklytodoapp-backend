@@ -105,6 +105,14 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<TaskResponse> searchTasks(String userId, String query) {
+        log.info("Searching tasks for user: {} with query: {}", userId, query);
+        List<Task> tasks = taskRepository.findByUserIdAndTitleContainingIgnoreCaseAndDeletedAtIsNullAndParentTaskIsNullOrderByDueDateAscCreatedAtDesc(Long.valueOf(userId), query);
+        return taskMapper.toResponseList(tasks);
+    }
+
+    @Override
     @Transactional
     public TaskResponse updateTask(Long taskId, TaskUpdateRequest request) {
         log.info("Updating task with id: {}", taskId);

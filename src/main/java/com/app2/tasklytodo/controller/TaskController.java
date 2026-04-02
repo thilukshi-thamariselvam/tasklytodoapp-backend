@@ -42,6 +42,15 @@ public class TaskController {
         return ApiResponse.success("Tasks retrieved successfully", responses);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<TaskResponse>>> searchTasks(
+            @RequestParam String userId,
+            @RequestParam String query) {
+        log.info("Received search request from user: {} for query: {}", userId, query);
+        List<TaskResponse> responses = taskService.searchTasks(userId, query);
+        return ApiResponse.success("Tasks retrieved successfully", responses);
+    }
+
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<TaskResponse>> updateTask(
             @PathVariable Long id,

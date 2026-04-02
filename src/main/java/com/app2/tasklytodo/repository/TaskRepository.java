@@ -14,4 +14,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     List<Task> findByUserIdAndDueDateAndParentTaskIsNullAndDeletedAtIsNull(Long userId, LocalDate dueDate);
 
+    List<Task> findByUserIdAndTitleContainingIgnoreCaseAndDeletedAtIsNullAndParentTaskIsNullOrderByDueDateAscCreatedAtDesc(Long userId, String query);
+
 }
