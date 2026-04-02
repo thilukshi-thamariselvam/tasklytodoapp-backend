@@ -26,4 +26,6 @@ public class TaskUpdateRequest {
 
     private List<String> subtaskTitles;
 
+    private List<Long> labelIds;
+
 }

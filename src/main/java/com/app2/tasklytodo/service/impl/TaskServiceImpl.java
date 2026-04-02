@@ -163,6 +163,12 @@ public class TaskServiceImpl implements TaskService {
                 task.getSubtasks().add(subtask);
             }
         }
+
+        if (request.getLabelIds() != null) {
+            Set<Label> labels = new HashSet<>(labelRepository.findAllById(request.getLabelIds()));
+            task.setLabels(labels);
+        }
+
         Task updatedTask = taskRepository.save(task);
         return taskMapper.toResponse(updatedTask);
     }
