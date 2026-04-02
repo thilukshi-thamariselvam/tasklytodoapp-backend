@@ -2,12 +2,15 @@ package com.app2.tasklytodo.entity;
 
 import com.app2.tasklytodo.entity.enums.TaskPriority;
 import com.app2.tasklytodo.entity.enums.TaskStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -38,6 +41,19 @@ public class Task {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     private TaskPriority priority;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_task_id")
+    private Task parentTask;
+
+    @Builder.Default
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "parentTask", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Task> subtasks = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
