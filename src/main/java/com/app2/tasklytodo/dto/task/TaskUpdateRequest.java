@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 public class TaskUpdateRequest {
@@ -22,5 +23,7 @@ public class TaskUpdateRequest {
     private LocalDate dueDate;
 
     private TaskStatus status;
+
+    private List<String> subtaskTitles;
 
 }

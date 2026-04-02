@@ -111,6 +111,23 @@ public class TaskServiceImpl implements TaskService {
             task.setStatus(request.getStatus());
         }
 
+        if (request.getSubtaskTitles() != null) {
+            if (task.getSubtasks() == null) {
+                task.setSubtasks(new ArrayList<>());
+            } else {
+                task.getSubtasks().clear();
+            }
+            for (String subtaskTitle : request.getSubtaskTitles()) {
+                Task subtask = Task.builder()
+                        .title(subtaskTitle)
+                        .status(TaskStatus.PENDING)
+                        .priority(task.getPriority())
+                        .user(task.getUser())
+                        .parentTask(task)
+                        .build();
+                task.getSubtasks().add(subtask);
+            }
+        }
         Task updatedTask = taskRepository.save(task);
         return taskMapper.toResponse(updatedTask);
     }
