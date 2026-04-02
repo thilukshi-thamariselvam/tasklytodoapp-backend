@@ -88,6 +88,15 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public TaskResponse getTaskById(Long taskId) {
+        log.info("Fetching task with id: {}", taskId);
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found with id: " + taskId));
+        return taskMapper.toResponse(task);
+    }
+
+    @Override
     @Transactional
     public TaskResponse updateTask(Long taskId, TaskUpdateRequest request) {
         log.info("Updating task with id: {}", taskId);

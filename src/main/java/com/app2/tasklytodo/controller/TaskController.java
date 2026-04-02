@@ -25,6 +25,12 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<TaskResponse> getTaskById(@PathVariable Long id) {
+        TaskResponse response = taskService.getTaskById(id);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping
     public ResponseEntity<List<TaskResponse>> getTasks(@RequestParam String userId) {
         List<TaskResponse> responses = taskService.getTasksByUser(userId);
