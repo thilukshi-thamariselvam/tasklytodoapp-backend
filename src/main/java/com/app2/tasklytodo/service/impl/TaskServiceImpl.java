@@ -15,9 +15,12 @@ import com.app2.tasklytodo.repository.UserRepository;
 import com.app2.tasklytodo.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,7 +86,7 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(readOnly = true)
     public List<TaskResponse> getTasksByUser(String userId) {
         log.info("Fetching all tasks for user: {}", userId);
-        List<Task> tasks = taskRepository.findByUserIdAndParentTaskIsNullOrderByDueDateAscCreatedAtDesc(Long.valueOf(userId));
+        List<Task> tasks = taskRepository.findByUserIdAndParentTaskIsNullAndDeletedAtIsNullOrderByDueDateAscCreatedAtDesc(Long.valueOf(userId));
         return taskMapper.toResponseList(tasks);
     }
 
@@ -93,6 +96,11 @@ public class TaskServiceImpl implements TaskService {
         log.info("Fetching task with id: {}", taskId);
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found with id: " + taskId));
+
+        if (task.getDeletedAt() != null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found with id: " + taskId);
+        }
+
         return taskMapper.toResponse(task);
     }
 
@@ -144,13 +152,17 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional
     public void deleteTask(Long taskId) {
-        log.info("Deleting task with id: {}", taskId);
+        log.info("Soft deleting task with id: {}", taskId);
 
-        if (!taskRepository.existsById(taskId)) {
-            throw new RuntimeException("Task not found with id: " + taskId);
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found with id: " + taskId));
+
+        if (task.getDeletedAt() != null) {
+            throw new RuntimeException("Task is already deleted");
         }
 
-        taskRepository.deleteById(taskId);
+        task.setDeletedAt(LocalDateTime.now());
+        taskRepository.save(task);
     }
 
     @Override

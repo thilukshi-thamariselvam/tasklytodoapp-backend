@@ -10,7 +10,8 @@ import java.util.List;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
-    List<Task> findByUserIdAndParentTaskIsNullOrderByDueDateAscCreatedAtDesc(Long userId);
+    List<Task> findByUserIdAndParentTaskIsNullAndDeletedAtIsNullOrderByDueDateAscCreatedAtDesc(Long userId);
 
-    List<Task> findByUserIdAndDueDateAndParentTaskIsNull(Long userId, LocalDate dueDate);
+    List<Task> findByUserIdAndDueDateAndParentTaskIsNullAndDeletedAtIsNull(Long userId, LocalDate dueDate);
+
 }
