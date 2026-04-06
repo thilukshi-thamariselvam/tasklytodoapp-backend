@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -221,5 +222,41 @@ public class TaskServiceImpl implements TaskService {
 
         Task savedTask = taskRepository.save(task);
         return taskMapper.toResponse(savedTask);
+    }
+
+    @Override
+    @Transactional
+    public TaskResponse updateTaskAttachment(Long taskId, MultipartFile file) {
+        log.info("Updating attachment for task with id: {}", taskId);
+
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
+
+        if (file != null && !file.isEmpty()) {
+            try {
+                if (task.getAttachmentUrl() != null) {
+                    Path oldFilePath = Paths.get("src/main/resources/static" + task.getAttachmentUrl());
+                    Files.deleteIfExists(oldFilePath);
+                }
+
+                String originalFilename = file.getOriginalFilename();
+                String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
+
+                Path uploadPath = Paths.get("src/main/resources/static/uploads/", uniqueFilename);
+
+                Files.createDirectories(uploadPath.getParent());
+                Files.write(uploadPath, file.getBytes());
+
+                task.setAttachmentUrl("/uploads/" + uniqueFilename);
+
+            } catch (IOException e) {
+                log.error("Failed to save file", e);
+                throw new BadRequestException("Failed to upload file");
+            }
+        }
+
+        Task updatedTask = taskRepository.save(task);
+        return taskMapper.toResponse(updatedTask);
     }
 }

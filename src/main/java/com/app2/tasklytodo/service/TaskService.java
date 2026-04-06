@@ -3,6 +3,7 @@ package com.app2.tasklytodo.service;
 import com.app2.tasklytodo.dto.task.TaskCreateRequest;
 import com.app2.tasklytodo.dto.task.TaskResponse;
 import com.app2.tasklytodo.dto.task.TaskUpdateRequest;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -21,4 +22,6 @@ public interface TaskService {
     TaskResponse getTaskById(Long taskId);
 
     List<TaskResponse> searchTasks(String userId, String query);
+
+    TaskResponse updateTaskAttachment(Long taskId, MultipartFile file);
 }

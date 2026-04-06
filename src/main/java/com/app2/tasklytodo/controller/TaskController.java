@@ -80,4 +80,14 @@ public class TaskController {
         TaskResponse response = taskService.completeTask(id);
         return ApiResponse.success("Task completed successfully", response);
     }
+
+    @PatchMapping(value = "/{id}/attachment", consumes = "multipart/form-data")
+    public ResponseEntity<ApiResponse<TaskResponse>> updateTaskAttachment(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file
+    ) {
+        log.info("Received request to update attachment for task id: {}", id);
+        TaskResponse response = taskService.updateTaskAttachment(id, file);
+        return ApiResponse.success("Attachment updated successfully", response);
+    }
 }
