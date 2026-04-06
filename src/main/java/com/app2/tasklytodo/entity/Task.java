@@ -84,6 +84,9 @@ public class Task {
     @Column(name = "attachment_url", length = 255)
     private String attachmentUrl;
 
+    @Column(name = "display_order")
+    private Integer displayOrder;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

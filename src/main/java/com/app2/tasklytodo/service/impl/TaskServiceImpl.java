@@ -1,6 +1,7 @@
 package com.app2.tasklytodo.service.impl;
 
 import com.app2.tasklytodo.dto.task.TaskCreateRequest;
+import com.app2.tasklytodo.dto.task.TaskOrderRequest;
 import com.app2.tasklytodo.dto.task.TaskResponse;
 import com.app2.tasklytodo.dto.task.TaskUpdateRequest;
 import com.app2.tasklytodo.entity.Label;
@@ -299,5 +300,17 @@ public class TaskServiceImpl implements TaskService {
 
         Task updatedTask = taskRepository.save(task);
         return taskMapper.toResponse(updatedTask);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "tasks", allEntries = true)
+    public void updateTasksOrder(List<TaskOrderRequest> requests) {
+        for (TaskOrderRequest req : requests) {
+            Task task = taskRepository.findById(req.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + req.getId()));
+            task.setDisplayOrder(req.getDisplayOrder());
+            taskRepository.save(task);
+        }
     }
 }

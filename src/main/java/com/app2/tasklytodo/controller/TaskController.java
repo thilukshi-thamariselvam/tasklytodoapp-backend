@@ -2,6 +2,7 @@ package com.app2.tasklytodo.controller;
 
 import com.app2.tasklytodo.dto.ApiResponse;
 import com.app2.tasklytodo.dto.task.TaskCreateRequest;
+import com.app2.tasklytodo.dto.task.TaskOrderRequest;
 import com.app2.tasklytodo.dto.task.TaskResponse;
 import com.app2.tasklytodo.dto.task.TaskUpdateRequest;
 import com.app2.tasklytodo.service.TaskService;
@@ -91,5 +92,13 @@ public class TaskController {
         log.info("Received request to update attachment for task id: {}", id);
         TaskResponse response = taskService.updateTaskAttachment(id, file);
         return ApiResponse.success("Attachment updated successfully", response);
+    }
+
+    @PutMapping("/order")
+    public ResponseEntity<ApiResponse<Void>> updateTasksOrder(
+            @RequestBody List<TaskOrderRequest> requests) {
+        log.info("Received request to update order for {} tasks", requests.size());
+        taskService.updateTasksOrder(requests);
+        return ApiResponse.success("Task order updated successfully", null);
     }
 }

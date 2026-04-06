@@ -19,7 +19,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
             "WHERE t.user.id = :userId " +
             "AND t.parentTask IS NULL " +
             "AND t.deletedAt IS NULL " +
-            "ORDER BY t.dueDate ASC, t.createdAt DESC")
+            "ORDER BY t.displayOrder ASC, t.createdAt DESC")
     List<Task> findMainTasksByUser(@Param("userId") Long userId);
 
     // 2. GET TASKS BY DATE (Today Page)
