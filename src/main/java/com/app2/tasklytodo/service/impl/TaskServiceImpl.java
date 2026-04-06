@@ -19,6 +19,9 @@ import com.app2.tasklytodo.repository.UserRepository;
 import com.app2.tasklytodo.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,6 +47,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "tasks", key = "#request.userId")
     public TaskResponse createTask(TaskCreateRequest request) {
         log.info("Creating task: {} for user: {}", request.getTitle(), request.getUserId());
 
@@ -116,16 +120,18 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "tasks", key = "#userId")
     public List<TaskResponse> getTasksByUser(String userId) {
-        log.info("Fetching all tasks for user: {}", userId);
+        log.info("Fetching all tasks for user: {} (FROM DATABASE)", userId);
         List<Task> tasks = taskRepository.findMainTasksByUser(Long.valueOf(userId));
         return taskMapper.toResponseList(tasks);
     }
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "task", key = "#taskId")
     public TaskResponse getTaskById(Long taskId) {
-        log.info("Fetching task with id: {}", taskId);
+        log.info("Fetching task with id: {} (FROM DATABASE)", taskId);
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
 
@@ -138,7 +144,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "searches", key = "#userId + '-' + #query + '-' + #context")
     public List<TaskResponse> searchTasks(String userId, String query, String context) {
+        log.info("Searching tasks for user: {} query: {} context: {} (FROM DATABASE)", userId, query, context);
         Long parsedUserId = Long.valueOf(userId);
         List<Task> tasks;
 
@@ -159,6 +167,11 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "tasks", allEntries = true),
+            @CacheEvict(value = "task", key = "#taskId"),
+            @CacheEvict(value = "searches", allEntries = true)
+    })
     public TaskResponse updateTask(Long taskId, TaskUpdateRequest request) {
         log.info("Updating task with id: {}", taskId);
 
@@ -210,6 +223,11 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "tasks", allEntries = true),
+            @CacheEvict(value = "task", key = "#taskId"),
+            @CacheEvict(value = "searches", allEntries = true)
+    })
     public void deleteTask(Long taskId) {
         log.info("Soft deleting task with id: {}", taskId);
 
@@ -226,6 +244,11 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "tasks", allEntries = true),
+            @CacheEvict(value = "task", key = "#taskId"),
+            @CacheEvict(value = "searches", allEntries = true)
+    })
     public TaskResponse completeTask(Long taskId) {
         log.info("Completing task with id: {}", taskId);
 
@@ -240,6 +263,10 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "tasks", allEntries = true),
+            @CacheEvict(value = "task", key = "#taskId")
+    })
     public TaskResponse updateTaskAttachment(Long taskId, MultipartFile file) {
         log.info("Updating attachment for task with id: {}", taskId);
 
