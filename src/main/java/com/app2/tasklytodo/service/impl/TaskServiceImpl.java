@@ -22,11 +22,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -63,6 +64,25 @@ public class TaskServiceImpl implements TaskService {
                 .project(project)
                 .build();
 
+        // -- FILE UPLOAD LOGIC --
+        if (request.getFile() != null && !request.getFile().isEmpty()) {
+            try {
+                String originalFilename = request.getFile().getOriginalFilename();
+                String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
+
+                Path uploadPath = Paths.get("src/main/resources/static/uploads/", uniqueFilename);
+
+                Files.createDirectories(uploadPath.getParent());
+                Files.write(uploadPath, request.getFile().getBytes());
+
+                task.setAttachmentUrl("/uploads/" + uniqueFilename);
+            } catch (IOException e) {
+                log.error("Failed to save file", e);
+                throw new BadRequestException("Failed to upload file");
+            }
+        }
+
         if (request.getLabelIds() != null && !request.getLabelIds().isEmpty()) {
             Set<Label> labels = new HashSet<>(labelRepository.findAllById(request.getLabelIds()));
             task.setLabels(labels);
@@ -96,7 +116,7 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(readOnly = true)
     public List<TaskResponse> getTasksByUser(String userId) {
         log.info("Fetching all tasks for user: {}", userId);
-        List<Task> tasks = taskRepository.findByUserIdAndParentTaskIsNullAndDeletedAtIsNullOrderByDueDateAscCreatedAtDesc(Long.valueOf(userId));
+        List<Task> tasks = taskRepository.findMainTasksByUser(Long.valueOf(userId));
         return taskMapper.toResponseList(tasks);
     }
 
@@ -118,7 +138,7 @@ public class TaskServiceImpl implements TaskService {
     @Transactional(readOnly = true)
     public List<TaskResponse> searchTasks(String userId, String query) {
         log.info("Searching tasks for user: {} with query: {}", userId, query);
-        List<Task> tasks = taskRepository.findByUserIdAndTitleContainingIgnoreCaseAndDeletedAtIsNullAndParentTaskIsNullOrderByDueDateAscCreatedAtDesc(Long.valueOf(userId), query);
+        List<Task> tasks = taskRepository.searchTasks(Long.valueOf(userId), query);
         return taskMapper.toResponseList(tasks);
     }
 

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -21,9 +22,15 @@ public class TaskController {
 
     private final TaskService taskService;
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<TaskResponse>> createTask(@Valid @RequestBody TaskCreateRequest request) {
-        log.info("Received request to create task: {}", request.getTitle());
+    @PostMapping(consumes = "multipart/form-data")
+    public ResponseEntity<ApiResponse<TaskResponse>> createTask
+            (@RequestPart("task") @Valid TaskCreateRequest request,
+             @RequestPart(value = "file", required = false) MultipartFile file
+            ) {
+        request.setFile(file);
+        log.info("Received request to create task with file: {}", file != null ?
+                file.getOriginalFilename() : "none");
+
         TaskResponse response = taskService.createTask(request);
         return ApiResponse.created("Task created successfully", response);
     }

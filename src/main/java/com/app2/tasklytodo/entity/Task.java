@@ -81,6 +81,9 @@ public class Task {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Column(name = "attachment_url", length = 255)
+    private String attachmentUrl;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
