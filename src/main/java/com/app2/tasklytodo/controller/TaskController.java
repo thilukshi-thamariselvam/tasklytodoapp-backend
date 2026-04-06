@@ -52,9 +52,11 @@ public class TaskController {
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<TaskResponse>>> searchTasks(
             @RequestParam String userId,
-            @RequestParam String query) {
-        log.info("Received search request from user: {} for query: {}", userId, query);
-        List<TaskResponse> responses = taskService.searchTasks(userId, query);
+            @RequestParam String query,
+            @RequestParam(required = false) String context
+    ) {
+        log.info("Search request from user: {} for query: {} in context: {}", userId, query, context);
+        List<TaskResponse> responses = taskService.searchTasks(userId, query, context);
         return ApiResponse.success("Tasks retrieved successfully", responses);
     }
 

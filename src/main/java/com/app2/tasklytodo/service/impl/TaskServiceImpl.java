@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -137,9 +138,22 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<TaskResponse> searchTasks(String userId, String query) {
-        log.info("Searching tasks for user: {} with query: {}", userId, query);
-        List<Task> tasks = taskRepository.searchTasks(Long.valueOf(userId), query);
+    public List<TaskResponse> searchTasks(String userId, String query, String context) {
+        Long parsedUserId = Long.valueOf(userId);
+        List<Task> tasks;
+
+        if ("inbox".equalsIgnoreCase(context)) {
+            tasks = taskRepository.searchInboxTasks(parsedUserId, query);
+        } else if ("today".equalsIgnoreCase(context)) {
+            tasks = taskRepository.searchTodayTasks(parsedUserId, query, LocalDate.now());
+        } else if ("upcoming".equalsIgnoreCase(context)) {
+            tasks = taskRepository.searchUpcomingTasks(parsedUserId, query, LocalDate.now());
+        } else if ("completed".equalsIgnoreCase(context)) {
+            tasks = taskRepository.searchCompletedTasks(parsedUserId, query);
+        } else {
+            tasks = taskRepository.searchTasks(parsedUserId, query);
+        }
+
         return taskMapper.toResponseList(tasks);
     }
 

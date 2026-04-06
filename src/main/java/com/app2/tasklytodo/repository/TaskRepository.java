@@ -43,4 +43,52 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
             "AND LOWER(t.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
             "ORDER BY t.dueDate ASC, t.createdAt DESC")
     List<Task> searchTasks(@Param("userId") Long userId, @Param("query") String query);
+
+    // SEARCH INBOX (Tasks with NO due date)
+    @Query("SELECT DISTINCT t FROM Task t " +
+            "LEFT JOIN FETCH t.subtasks s " +
+            "LEFT JOIN FETCH t.labels l " +
+            "WHERE t.user.id = :userId " +
+            "AND t.parentTask IS NULL " +
+            "AND t.deletedAt IS NULL " +
+            "AND t.dueDate IS NULL " +
+            "AND LOWER(t.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
+            "ORDER BY t.createdAt DESC")
+    List<Task> searchInboxTasks(@Param("userId") Long userId, @Param("query") String query);
+
+    // SEARCH TODAY (Tasks due exactly today)
+    @Query("SELECT DISTINCT t FROM Task t " +
+            "LEFT JOIN FETCH t.subtasks s " +
+            "LEFT JOIN FETCH t.labels l " +
+            "WHERE t.user.id = :userId " +
+            "AND t.parentTask IS NULL " +
+            "AND t.deletedAt IS NULL " +
+            "AND t.dueDate = :todayDate " +
+            "AND LOWER(t.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
+            "ORDER BY t.createdAt DESC")
+    List<Task> searchTodayTasks(@Param("userId") Long userId, @Param("query") String query, @Param("todayDate") LocalDate todayDate);
+
+    // SEARCH UPCOMING (Tasks due in the future)
+    @Query("SELECT DISTINCT t FROM Task t " +
+            "LEFT JOIN FETCH t.subtasks s " +
+            "LEFT JOIN FETCH t.labels l " +
+            "WHERE t.user.id = :userId " +
+            "AND t.parentTask IS NULL " +
+            "AND t.deletedAt IS NULL " +
+            "AND t.dueDate > :todayDate " +
+            "AND LOWER(t.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
+            "ORDER BY t.dueDate ASC")
+    List<Task> searchUpcomingTasks(@Param("userId") Long userId, @Param("query") String query, @Param("todayDate") LocalDate todayDate);
+
+    // SEARCH COMPLETED TASKS
+    @Query("SELECT DISTINCT t FROM Task t " +
+            "LEFT JOIN FETCH t.subtasks s " +
+            "LEFT JOIN FETCH t.labels l " +
+            "WHERE t.user.id = :userId " +
+            "AND t.parentTask IS NULL " +
+            "AND t.deletedAt IS NULL " +
+            "AND t.status = 'COMPLETED' " + // <-- The magic line
+            "AND LOWER(t.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
+            "ORDER BY t.createdAt DESC")
+    List<Task> searchCompletedTasks(@Param("userId") Long userId, @Param("query") String query);
 }

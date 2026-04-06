@@ -21,7 +21,7 @@ public interface TaskService {
 
     TaskResponse getTaskById(Long taskId);
 
-    List<TaskResponse> searchTasks(String userId, String query);
+    List<TaskResponse> searchTasks(String userId, String query, String context);
 
     TaskResponse updateTaskAttachment(Long taskId, MultipartFile file);
 }
